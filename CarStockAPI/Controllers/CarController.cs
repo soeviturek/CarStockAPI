@@ -32,6 +32,7 @@ namespace CarStockAPI.Controllers
             return _carService.GetAllCar(GetDealerId());
         }
 
+        //get by Id
         [Authorize]
         [HttpGet("{id}")]
         public string Get(string id)
@@ -46,10 +47,18 @@ namespace CarStockAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public string Post(string Make, string Model, int Year)
+        [HttpGet("GetByMakeModel")]
+        public List<Car> GetByMakeModel(string make="",string model="")
         {
-            Car car = new Car(Make, Model, Year, GetDealerId());
+            return _carService.GetByMakeModel(make,model,GetDealerId());
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        public string Post(string Make, string Model, int Year,int stockLevel)
+        {
+            Car car = new Car(Make, Model, Year, GetDealerId(),stockLevel);
             if (_carService.AddCar(car))
             {
                 return String.Format("Car added!\n{0}",car.ToString());
@@ -58,10 +67,11 @@ namespace CarStockAPI.Controllers
             return "Unkown Error!";
         }
 
-        [HttpPut("{id}")]
-        public string Put(string id, string Make, string Model, int Year)
+        [HttpPut("UpdateStockValue/{id}")]
+        public string Put(string id, int stockLevel)
         {
-            Car car = new Car(id,Make, Model, Year, GetDealerId());
+            Car car = _carService.GetCar(id,GetDealerId());
+            car.StockLevel = stockLevel;
             if (_carService.EditCar(car))
             {
                 return "Car updated!";
